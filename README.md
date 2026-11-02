@@ -10,7 +10,7 @@ BlackCrow Thumper 1:8 CJ7 攀爬車（[Printables 323433](https://www.printables
 
 | 路徑 | 內容 |
 |---|---|
-| `site/` | 網站本體（index.html、style.css、app.js、data.js、img/）。Cloudflare Pages 就發佈這一層 |
+| `site/` | 網站本體（index.html、style.css、app.js、data.js、img/）。Cloudflare 就發佈這一層 |
 | `tools/catalog_def.py` | 手寫的選項、規則、採購品項、預設配置，**改規則改這裡** |
 | `tools/assembly_def.py` | 組裝階段、官方影片、齒比資料 |
 | `tools/build.py` | 把 catalog_def 和 Printables 資料合成 `site/data.js`，並下載圖片 |
@@ -35,11 +35,12 @@ python -m http.server 8765 --directory site
 
 打開 http://localhost:8765
 
-## 部署（GitHub + Cloudflare Pages）
+## 部署（GitHub + Cloudflare Workers）
 
-Cloudflare Pages 設定：
-- Framework preset：None
-- Build command：留空
-- Build output directory：`site`
+網址：https://thumper-cfg.purpleliu.com/
 
-之後只要 `git push`，Cloudflare 就會自動更新網站。
+Cloudflare Workers 連 GitHub 自動建置，設定在 `wrangler.jsonc`（只發佈 `site/`）：
+- 組建命令：留空
+- 部署命令：`npx wrangler deploy`
+
+之後只要 `git push`，Cloudflare 就會自動更新網站（約 1–3 分鐘）。
