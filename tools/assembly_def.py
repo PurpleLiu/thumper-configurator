@@ -29,7 +29,10 @@ STAGES = [
          S('p1', '每種要用的材料各印一個 00TestBlock，壓一顆 MR115（5×11×4）試鬆緊，也試球頭。', 'author'),
          S('p2', '球頭太緊或太鬆：到 Requested parts（396992）下載縮小 0.1／0.2mm 的連桿。', 'author'),
          S('p3', '5mm 棒用黃銅棒最好切。穿不進軸承就先修毛邊，再用小電鑽夾著棒子在 100 號砂紙裡轉一下縮徑；不要用大電鑽，也不要用車床。', 'author'),
-         S('p4', '照變速箱影片裁 5mm 棒，兩端倒角。', when={'trans': CHEATERS}),
+         S('p4', '裁變速箱的 5mm 棒：64mm、84mm 各一支，兩端倒角。', 'author', when={'trans': CHEATERS}),
+         S('p4p', '裁變速箱的 5mm 棒：113mm、65mm、35mm 各一支（舊影片說 114mm，作者 2023-02 改成 113mm），兩端倒角。', 'author', when={'trans': ['pr_a', 'pr_b']}),
+         S('p4g', '裁變速箱的 5mm 棒：長度照 A 或 B 的影片（G 只換馬達端零件，推測跟 A／B 一樣是 113mm、65mm、35mm）。', 'guess', when={'trans': ['pr_g']}),
+         S('p4c', '裁變速箱的 5mm 棒：80mm、65mm 各一支，兩端倒角。', 'author', when={'trans': ['pr_c']}),
          S('p5', '要印 PETG-CF／PA-CF 的話先換硬化鋼噴嘴；PA-CF 先烘乾（我們用 80°C 24 小時）。', 'ours'),
      ],
      'warns': [W('作者照強化 PLA 設計：0.4 噴嘴、層高 0.2（不能更高）、牆 0.8mm、不開支撐（模型有內建支撐）。', 'author')]},
@@ -86,7 +89,8 @@ STAGES = [
 
     {'id': 'frame', 'zh': '底盤 1：中車架、前車架、前伺服、前保險桿',
      'videos': [V('fujb8-Tcgms', '影片 4／8（2023-11 更新版）'), V('eOwHuJb2ZyU', '影片 4／8（舊版）', old=True),
-                V('v7iBpwpZv34', '高底盤組裝', when={'chassis': ['hc']})],
+                V('v7iBpwpZv34', '高底盤組裝', when={'chassis': ['hc']}),
+                V('iOoUGm3lwjE', '高底盤：舊車拆解（原版底盤已經組好才看）', when={'chassis': ['hc']})],
      'steps': [
          S('f1', '043 中車架、044 連接件、045／046 前車架組起來。', unless={'chassis': ['hc']}),
          S('f1h', '高底盤的中車架、前車架左右，加 044 連接件（不用 043、045、046）。', when={'chassis': ['hc']}),
@@ -122,6 +126,7 @@ STAGES = [
 
     {'id': 'rear', 'zh': '底盤 3：後車架、尾門電池盒、後保險桿、拖車鉤',
      'videos': [V('1JAfCCM61l0', '影片 5／8（更新版）'), V('3MqvjHLNRvY', '4WS 組裝', when={'steer': ['ws4']}),
+                V('ZgsWcj7UD6g', '4WS：舊車拆解準備（原版已經組好才看）', when={'steer': ['ws4']}),
                 V('uCtInqaMiSA', 'Pintle 拖車鉤', unless={'hitch': ['none']})],
      'steps': [
          S('r1', '048／049 後車架、050／051 避震座、052 橫樑、054／055 連接件、053 尾門電池盒。', unless={'steer': ['ws4']}),
@@ -152,6 +157,7 @@ STAGES = [
                 V('v-watdKg1SQ', '4WS 後橋 6-C（舊版）', old=True, when={'steer': ['ws4']})],
      'steps': [
          S('ra1', '200 差速殼、201／203 橋殼、2 個 202 軸承座，裝第二組 AR44 齒輪和後半軸。', unless={'steer': ['ws4']}),
+         S('ra1r', '（選做）201／203 後橋殼可以各穿一支 5mm×63mm 棒補強（作者 2024-08 更新）。', 'author', unless={'steer': ['ws4']}),
          S('ra2', '後差速殼換 I 可調齒隙版。', when={'func': ['I']}),
          S('ra1w', '309 差速殼、308／310 橋殼、311／312 轉向節（不是再印一組 207／208），照 6C 做橋殼補強。', 'author', when={'steer': ['ws4']}),
          S('ra3', '大齒輪方向要跟前橋一致，前後橋才不會互頂。', 'ours'),
@@ -226,9 +232,7 @@ STAGES = [
 EXTRA_VIDEOS = [
     V('jXBEKSlEzNU', 'Thumper 介紹', cat='介紹'),
     V('lh9M8WSyPVU', '高底盤介紹', cat='介紹', when={'chassis': ['hc']}),
-    V('iOoUGm3lwjE', '高底盤：舊車拆解（已經組好原版底盤的人看）', cat='介紹', when={'chassis': ['hc']}),
     V('llEIOzB9Q1o', '4WS 介紹', cat='介紹', when={'steer': ['ws4']}),
-    V('ZgsWcj7UD6g', '4WS：舊車拆解準備', cat='介紹', when={'steer': ['ws4']}),
     V('QE-FoBZ2vPU', '作者整理的網友實車照', cat='網友實車照'),
     V('eNKP3jivkdE', '2025 網友實車照合輯', cat='網友實車照'),
 ]

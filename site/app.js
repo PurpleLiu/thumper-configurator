@@ -194,7 +194,17 @@
         <td><a href="${pg.url}" target="_blank" rel="noopener">${esc(pg.zh)} ↗</a>${pg.kind === 'third' ? '<div class="tip"><span class="tag unoff">非官方</span></div>' : ''}</td></tr>`;
     });
     let pieces = 0; res.list.forEach(v => pieces += v.n);
+    // 要去哪幾個頁面下載：主車排第一，其他照需要的檔數排
+    const need = {};
+    res.list.forEach((v, k) => { const pg = D.parts[k].page; need[pg] = (need[pg] || 0) + 1; });
+    const dl = Object.entries(need).sort((a, b) => (b[0] === '323433') - (a[0] === '323433') || b[1] - a[1]).map(([id, n]) => {
+      const pg = D.pages[id];
+      return `<a class="dl" href="${pg.url}/files" target="_blank" rel="noopener"><b>${esc(pg.zh)} ↗</b>${pg.kind === 'third' ? '<span class="tag unoff">非官方</span>' : ''}<span>要 ${n} 個檔／頁面共 ${pg.count} 個</span></a>`;
+    }).join('');
     $('#panel-print').innerHTML = `<h2 class="ph">列印清單</h2>
+      <h3 class="vh">先到這 ${Object.keys(need).length} 個頁面下載</h3>
+      <p class="pn">每個頁面的檔案區上方都有「Download all」可以一次下載整包，再照下面的清單挑要印的檔；頁面上其他用不到的檔不用印。</p>
+      <div class="dls">${dl}</div>
       <p class="pn">共 ${res.list.size} 個 STL 檔、${pieces} 個零件。請到每一列右邊連結的 Printables 頁面下載。「作者」欄是作者建議的填充（作者用強化 PLA 設計）；「我們」欄是社團分享者實際用的材質，只有做過的零件才有。檔名有 2X、4X 的檔案裡只有 1 個零件，要照份數印。</p>
       <div class="tools"><label><input type="checkbox" id="onlyTodo" ${onlyTodo ? 'checked' : ''}> 只看還沒印的</label>
       <button class="btn ghost" id="csv-print">下載 CSV</button><button class="btn ghost" id="clear-print">清除已印勾選</button></div>
