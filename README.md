@@ -12,6 +12,7 @@ BlackCrow Thumper 1:8 CJ7 攀爬車（[Printables 323433](https://www.printables
 |---|---|
 | `site/` | 網站本體（index.html、style.css、app.js、data.js、img/）。Cloudflare Pages 就發佈這一層 |
 | `tools/catalog_def.py` | 手寫的選項、規則、採購品項、預設配置，**改規則改這裡** |
+| `tools/assembly_def.py` | 組裝階段、官方影片、齒比資料 |
 | `tools/build.py` | 把 catalog_def 和 Printables 資料合成 `site/data.js`，並下載圖片 |
 | `data/raw/` | 從 Printables API 抓下來的頁面資料（不進 git） |
 | `規則清單.md` | 規則草稿，給人看的版本 |

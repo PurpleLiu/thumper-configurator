@@ -259,7 +259,13 @@ PITFALLS = [
 PRINT_SETTINGS = {'author': '強化 PLA（作者推薦 Prusa PLA、Inland Plus、CC3D Max；Hatchbox 測試不好）；0.4 噴嘴、層高 0.2、牆 0.8mm（2 圈）；一般 15%、防滾架 25%、車橋／連桿／輪轂／輪框 80%（100% 會放大過擠問題）；不開支撐。',
                   'ours': '結構件改用碳纖料：車橋、轉向節、輪轂、全部連桿、B540C、前車架用 PA-CF；車架、輪框用 PETG-CF；保險桿、側踏板、鉸鏈扣具用 PETG；車身外觀照作者用 PLA。'}
 
-data = {'fetched': index.get('fetched'), 'pages': pages, 'parts': parts, 'base': base, 'groups': groups,
+import assembly_def as A
+for k, v in parts.items():
+    v['stage'] = A.stage_of(k)
+yt_seen = {v['id'] for st in A.STAGES for v in st['videos']} | {v['id'] for v in A.EXTRA_VIDEOS}
+ASSEMBLY = {'stages': A.STAGES, 'extraVideos': A.EXTRA_VIDEOS, 'ratio': A.RATIO, 'kv': A.KV, 'axle': A.AXLE}
+
+data = {'assembly': ASSEMBLY, 'fetched': index.get('fetched'), 'pages': pages, 'parts': parts, 'base': base, 'groups': groups,
         'items': {k: {**v, 'tip': list(v['tip']) if 'tip' in v else None} for k, v in C.ITEMS.items()},
         'baseBom': [{'item': i, 'qty': q} for i, q in C.BASE_BOM], 'presets': C.PRESETS, 'esc': ESC,
         'escParts': {'30': f'{C.MAIN}:032ECSMount30-60AMP', '80': f'{C.MAIN}:033ECSMount80AMP', '30led': f'{C.HEAD}:04ECSMount30', '80led': f'{C.HEAD}:04ECSMount80'},

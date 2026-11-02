@@ -118,6 +118,43 @@ dialog p { color: #eee; text-align: center; margin: 8px 0 0; font-size: 14px }
 
 /* 手機：卡片兩欄、圖片變矮、說明最多三行；底部固定一條摘要列 */
 .mbar { display: none }
+/* 組裝步驟、影片、齒比計算 */
+.prog { font-size: 14px; margin-right: 6px }
+.stage { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; margin: 0 0 10px; padding: 0 14px }
+.stage > summary { display: flex; align-items: center; gap: 10px; padding: 12px 0; cursor: pointer; list-style: none; font-weight: 700 }
+.stage > summary::-webkit-details-marker { display: none }
+.stage .sn { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-size: 13px }
+.stage.done .sn { background: var(--ok) }
+.stage .st { flex: 1 }
+.stage .sc { font: 500 13px var(--mono, monospace); color: var(--muted) }
+.stage[open] { padding-bottom: 14px }
+.steps { margin: 4px 0 0; padding-left: 0; list-style: none; display: grid; gap: 6px }
+.steps label { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.55; cursor: pointer }
+.steps input { margin-top: 4px; flex: none; width: 16px; height: 16px; accent-color: var(--ok) }
+.steps input:checked + span { color: var(--muted); text-decoration: line-through }
+.vids { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin: 4px 0 12px }
+.vcard { display: block; text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: var(--paper); font-size: 13px; font-weight: 600 }
+.vcard img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--tile) }
+.vcard span { display: block; padding: 7px 9px }
+.vcard:hover { border-color: var(--accent) }
+.vcard.old { opacity: .8 }
+.vh { font-size: 15px; margin: 20px 0 8px }
+.sparts { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; font-size: 12px }
+.sparts b { flex-basis: 100%; font-size: 13px; margin-bottom: 2px }
+.chip { border: 1px solid var(--line); border-radius: 99px; padding: 2px 8px; background: var(--bg) }
+.chip.ok { background: var(--ok-bg); color: var(--ok); border-color: transparent }
+.calc { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 16px; align-items: start }
+.cin { display: grid; gap: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px }
+.cin label { display: grid; gap: 4px; font-size: 13px; font-weight: 700 }
+.cin input, .cin select { font: inherit; font-weight: 500; padding: 7px 9px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); color: var(--ink) }
+.cin small, .stat small { font-weight: 400; color: var(--muted); font-size: 12px }
+.cout { display: grid; gap: 10px }
+.stat { background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 4px; padding: 12px 14px; display: grid; gap: 2px }
+.stat span { font-size: 13px; color: var(--muted) }
+.stat b { font-size: 26px; font-variant-numeric: tabular-nums }
+.opt .desc + .desc { margin-left: 10px }
+@media (max-width: 760px) { .calc { grid-template-columns: 1fr } .vids { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+
 @media (max-width: 640px) {
   .opts { grid-template-columns: 1fr 1fr; gap: 8px }
   .opt .pic { aspect-ratio: 4 / 3 }

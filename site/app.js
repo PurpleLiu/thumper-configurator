@@ -147,7 +147,7 @@
       return `<section class="group" id="g-${g.id}"><h2>${esc(g.zh)}<small>${g.type === 'many' ? '可複選' : '選一個'}</small></h2>
         <div class="opts">${g.options.map(o => {
           const on = cur.includes(o.id), ok = okFor(o, sel);
-          const page = o.page && D.pages[o.page] ? `<a class="desc" href="${D.pages[o.page].url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Printables ${o.page} ↗</a>` : '';
+          const page = o.page && D.pages[o.page] ? `<a class="desc" href="${D.pages[o.page].url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Printables ${o.page} ↗</a><a class="desc" href="${D.pages[o.page].url}/makes" target="_blank" rel="noopener" onclick="event.stopPropagation()">網友作品照 ↗</a>` : '';
           return `<button type="button" class="opt ${ok ? '' : 'blocked'}" aria-pressed="${on}" data-g="${g.id}" data-o="${o.id}">
             ${img(o)}${shots(o).length ? `<span class="zoom" data-zoom="${g.id}|${o.id}">${shots(o).length > 1 ? '照片 ' + shots(o).length + ' 張' : '放大'}</span>` : ''}
             <span class="txt"><span class="name">${o.unofficial ? '<span class="tag unoff">非官方</span>' : ''}${esc(o.zh)}</span>
@@ -242,6 +242,92 @@
       <h2 class="ph">非官方頁面</h2><div class="pages">${pg('third')}</div>`;
   }
 
+  // ---------- 畫面：組裝步驟 ----------
+  const A = D.assembly;
+  // when／unless：{群組: [選項]}；any 為 true 時任一群組符合就算
+  const part1 = (w, s, any) => any ? Object.entries(w).some(([g, ids]) => matches({ [g]: ids }, s)) : matches(w, s);
+  const cond = (x, s) => (!x.when || part1(x.when, s, x.any)) && (!x.unless || !part1(x.unless, s, x.any));
+  const ytUrl = id => 'https://www.youtube.com/watch?v=' + id;
+  const srcTag = s => s ? `<span class="tag ${s}">${SRC[s]}</span>` : '';
+  function vcard(v) {
+    return `<a class="vcard ${v.old ? 'old' : ''}" href="${ytUrl(v.id)}" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" alt="" loading="lazy"><span>${v.old ? '<span class="tag guess">舊版</span>' : ''}${esc(v.zh)} ↗</span></a>`;
+  }
+  function renderAssembly() {
+    const res = compute(sel), done = store.get('steps', {}), printed = store.get('printed', {}), open = store.get('openStages', {});
+    const stages = A.stages.filter(st => cond(st, sel));
+    let all = 0, ok = 0;
+    const cards = stages.map((st, i) => {
+      const steps = st.steps.filter(x => cond(x, sel)), warns = st.warns.filter(x => cond(x, sel)), vids = st.videos.filter(x => cond(x, sel));
+      const ps = [...res.list.entries()].filter(([k]) => D.parts[k].stage === st.id);
+      const n = steps.filter(x => done[st.id + ':' + x.id]).length; all += steps.length; ok += n;
+      const isOpen = open[st.id] !== undefined ? open[st.id] : n < steps.length;
+      return `<details class="stage ${n === steps.length && steps.length ? 'done' : ''}" data-stage="${st.id}" ${isOpen ? 'open' : ''}>
+        <summary><span class="sn">${i + 1}</span><span class="st">${esc(st.zh)}</span><span class="sc">${n} / ${steps.length}</span></summary>
+        ${vids.length ? `<div class="vids">${vids.map(vcard).join('')}</div>` : ''}
+        <ol class="steps">${steps.map(x => { const k = st.id + ':' + x.id; return `<li><label><input type="checkbox" data-step="${esc(k)}" ${done[k] ? 'checked' : ''}><span>${srcTag(x.src)}${esc(x.text)}</span></label></li>`; }).join('')}</ol>
+        ${warns.length ? `<ul class="warns">${warns.map(w => `<li>${srcTag(w.src)}${esc(w.text)}</li>`).join('')}</ul>` : ''}
+        ${ps.length ? `<div class="sparts"><b>這一段用到的列印件（${ps.filter(([k]) => printed[k]).length} / ${ps.length} 已印）</b>${ps.map(([k, v]) => `<span class="chip ${printed[k] ? 'ok' : ''}" title="${esc(D.parts[k].file)}">${esc(D.parts[k].zh)}${v.n > 1 ? ' ×' + v.n : ''}</span>`).join('')}</div>` : ''}
+      </details>`;
+    }).join('');
+    const extra = [...res.list.keys()].filter(k => D.parts[k].stage === 'extra');
+    $('#panel-steps').innerHTML = `<h2 class="ph">組裝步驟</h2>
+      <p class="pn">照作者影片的順序：先車身、再底盤。步驟、影片和注意事項會跟著你的選配變。作者的主車影片 1–8 是用原版零件拍的，換了選配的地方看該階段列的配件影片。完成的步驟打勾會存在這台裝置的瀏覽器裡。</p>
+      <div class="tools"><span class="prog"><b>${ok}</b> / ${all} 步完成</span><button class="btn ghost" id="steps-open">全部展開</button><button class="btn ghost" id="steps-close">全部收合</button><button class="btn ghost" id="clear-steps">清除打勾</button></div>
+      ${cards}
+      ${extra.length ? `<div class="sparts"><b>其他配件（照各自頁面說明安裝）</b>${extra.map(k => `<span class="chip">${esc(D.parts[k].zh)}</span>`).join('')}</div>` : ''}`;
+  }
+
+  // ---------- 畫面：影片 ----------
+  function renderVideos() {
+    const showAll = store.get('allVideos', false), seen = new Set();
+    const sec = (title, vids) => vids.length ? `<h3 class="vh">${esc(title)}</h3><div class="vids">${vids.map(vcard).join('')}</div>` : '';
+    let html = '';
+    A.stages.forEach(st => {
+      const vids = st.videos.filter(v => !seen.has(v.id) && (showAll || (cond(st, sel) && cond(v, sel))));
+      vids.forEach(v => seen.add(v.id));
+      html += sec(st.zh, vids);
+    });
+    const cats = {};
+    A.extraVideos.filter(v => showAll || cond(v, sel)).forEach(v => (cats[v.cat] = cats[v.cat] || []).push(v));
+    Object.entries(cats).forEach(([c, v]) => html += sec(c, v));
+    $('#panel-videos').innerHTML = `<h2 class="ph">官方影片</h2>
+      <p class="pn">全部是作者 BlackCrow 的 YouTube 頻道（<a href="https://www.youtube.com/@RockyTop_BC" target="_blank" rel="noopener">@RockyTop_BC ↗</a>）。預設只列你目前配置用得到的；標「舊版」的是作者重拍前的版本，零件可能跟現在的檔案不同。</p>
+      <div class="tools"><label><input type="checkbox" id="allVideos" ${showAll ? 'checked' : ''}> 顯示全部影片（含跟你配置無關的）</label></div>${html}`;
+  }
+
+  // ---------- 畫面：齒比計算 ----------
+  function renderCalc() {
+    const c = Object.assign({ axle: 33, tire: 120, cells: 2 }, store.get('calc', {}));
+    const tr = A.ratio[sel.trans], kvDef = A.kv[sel.motor];
+    const ratio = c.ratioOverride || tr || 4, kv = c.kvOverride || kvDef || 1200;
+    const fin = ratio * (c.axle / 8), circ = Math.PI * c.tire, mm = circ / fin;
+    const kmh = kv * c.cells * 3.7 / fin * circ * 60 / 1e6;
+    const trans = opt('trans', sel.trans), motor = opt('motor', sel.motor);
+    const band = mm < 17 ? '純攀爬（作者 A 變速箱的範圍）' : mm <= 26 ? '攀爬兼跑（作者 B 變速箱的範圍）' : '高速跑（作者 C 變速箱的範圍，不適合攀爬）';
+    $('#panel-calc').innerHTML = `<h2 class="ph">齒比與推進距離</h2>
+      <p class="pn">作者用「馬達轉一圈，車子前進幾 mm」比較各種配置：數字越小越慢、越好控制。總減速比 = 變速箱 × 車橋（大齒輪 ÷ 8T）；推進距離 = 輪胎周長 ÷ 總減速比。變速箱和馬達 KV 先照你的選配帶入，也可以自己改。</p>
+      <div class="calc">
+        <div class="cin">
+          <label>變速箱減速比<input type="number" step="0.01" min="1" id="c-ratio" value="${ratio}"><small>${esc(trans.zh)}${tr ? `（作者：${tr}:1）` : ''}</small></label>
+          <label>車橋傘齒<select id="c-axle">${A.axle.map(([t, zh]) => `<option value="${t}" ${t === c.axle ? 'selected' : ''}>${esc(zh)}</option>`).join('')}</select></label>
+          <label>輪胎外徑（mm）<input type="number" step="1" min="80" max="200" id="c-tire" value="${c.tire}"><small>作者的 1.9 吋胎是 120mm</small></label>
+          <label>馬達 KV<input type="number" step="10" min="100" id="c-kv" value="${kv}"><small>${esc(motor.zh)}${kvDef ? '' : '（這顆馬達沒有固定 KV，請自己填）'}</small></label>
+          <label>電池<select id="c-cells"><option value="2" ${c.cells === 2 ? 'selected' : ''}>2S（7.4V）</option><option value="3" ${c.cells === 3 ? 'selected' : ''}>3S（11.1V）</option></select></label>
+          <button class="btn ghost" id="c-reset">照選配重新帶入</button>
+        </div>
+        <div class="cout">
+          <div class="stat"><span>總減速比</span><b>${fin.toFixed(1)} : 1</b><small>${ratio} × ${(c.axle / 8).toFixed(3)}</small></div>
+          <div class="stat"><span>馬達每轉前進</span><b>${mm.toFixed(1)} mm</b><small>${band}</small></div>
+          <div class="stat"><span>理論極速（無負載）</span><b>${kmh.toFixed(1)} km/h</b><small>KV × 電壓換算；實際跑起來會再慢一些</small></div>
+        </div>
+      </div>
+      <h3 class="vh">作者的對照表（120mm 輪胎）<span class="tag author">作者</span></h3>
+      <div class="tblwrap"><table><thead><tr><th>變速箱</th><th>車橋</th><th class="num">總減速比</th><th class="num">每轉前進</th></tr></thead><tbody>
+      ${[['列印 A（7.5:1）', 7.5], ['列印 B（5:1）', 5], ['列印 C（1.86:1）', 1.86]].flatMap(([n, r]) => [33, 30, 27, 24].map(t => `<tr><td>${n}</td><td>8T-${t}T</td><td class="num">${(r * t / 8).toFixed(1)}</td><td class="num">${(120 * Math.PI / (r * t / 8)).toFixed(0)} mm</td></tr>`)).join('')}
+      </tbody></table></div>
+      <p class="pn">金屬齒輪 A2／A540 是 6.25:1、B2／B540／B540C 是 4:1、C2 是 2:1（作者 769045 頁面）。</p>`;
+  }
+
   // ---------- 匯出、分享 ----------
   function csv(name, head, rows) {
     const s = '﻿' + [head, ...rows].map(r => r.map(x => '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"').join(',')).join('\r\n');
@@ -282,6 +368,9 @@
     if (tab === 'print') renderPrint();
     if (tab === 'bom') renderBom();
     if (tab === 'tips') renderTips();
+    if (tab === 'steps') renderAssembly();
+    if (tab === 'videos') renderVideos();
+    if (tab === 'calc') renderCalc();
   }
   $('#presets').innerHTML = '<span class="lbl">一鍵套用：</span>' + D.presets.map(p => `<button class="btn" data-preset="${p.id}" title="${esc(p.desc)}">${esc(p.zh)}</button>`).join('');
   document.addEventListener('click', e => {
@@ -305,6 +394,9 @@
     if (t.id === 'reset') { sel = defaults(); store.set('sel', sel); render(); return; }
     if (t.dataset.copy) return copy(t.dataset.copy, '已複製：' + t.dataset.copy);
     if (t.id === 'clear-print') { store.set('printed', {}); return render(); }
+    if (t.id === 'clear-steps') { store.set('steps', {}); return render(); }
+    if (t.id === 'steps-open' || t.id === 'steps-close') { const o = {}; A.stages.forEach(st => o[st.id] = t.id === 'steps-open'); store.set('openStages', o); return render(); }
+    if (t.id === 'c-reset') { store.set('calc', {}); return render(); }
     if (t.id === 'clear-bom') { store.set('bought', {}); return render(); }
     if (t.id === 'csv-print') {
       const r = compute(sel), pr2 = store.get('printed', {});
@@ -323,7 +415,18 @@
     if (t.dataset.pk) { const p = store.get('printed', {}); p[t.dataset.pk] = t.checked; store.set('printed', p); return render(); }
     if (t.dataset.bk) { const b = store.get('bought', {}); b[t.dataset.bk] = t.checked; store.set('bought', b); return render(); }
     if (t.id === 'onlyTodo') { store.set('onlyTodo', t.checked); return render(); }
+    if (t.dataset.step) { const d = store.get('steps', {}); d[t.dataset.step] = t.checked; store.set('steps', d); return render(); }
+    if (t.id === 'allVideos') { store.set('allVideos', t.checked); return render(); }
+    if (t.id && t.id.startsWith('c-')) {
+      const c = store.get('calc', {}), v = parseFloat(t.value);
+      ({ 'c-ratio': 'ratioOverride', 'c-kv': 'kvOverride', 'c-axle': 'axle', 'c-tire': 'tire', 'c-cells': 'cells' })[t.id] && (c[{ 'c-ratio': 'ratioOverride', 'c-kv': 'kvOverride', 'c-axle': 'axle', 'c-tire': 'tire', 'c-cells': 'cells' }[t.id]] = v);
+      store.set('calc', c); return render();
+    }
   });
+  document.addEventListener('toggle', e => {
+    const d = e.target; if (!d.dataset || !d.dataset.stage) return;
+    const o = store.get('openStages', {}); o[d.dataset.stage] = d.open; store.set('openStages', o);
+  }, true);
   $('#zoom-close').addEventListener('click', () => $('#zoom').close());
   $('#zoom').addEventListener('click', e => { if (e.target.id === 'zoom') $('#zoom').close(); });
   $('#zoom').addEventListener('keydown', e => {
