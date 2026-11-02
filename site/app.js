@@ -291,7 +291,7 @@
     A.extraVideos.filter(v => showAll || cond(v, sel)).forEach(v => (cats[v.cat] = cats[v.cat] || []).push(v));
     Object.entries(cats).forEach(([c, v]) => html += sec(c, v));
     $('#panel-videos').innerHTML = `<h2 class="ph">官方影片</h2>
-      <p class="pn">全部是作者 BlackCrow 的 YouTube 頻道（<a href="https://www.youtube.com/@RockyTop_BC" target="_blank" rel="noopener">@RockyTop_BC ↗</a>）。預設只列你目前配置用得到的；標「舊版」的是作者重拍前的版本，零件可能跟現在的檔案不同。</p>
+      <p class="pn">全部是作者 BlackCrow 的 YouTube 頻道（<a href="https://www.youtube.com/@RockyTop_BC" target="_blank" rel="noopener">@RockyTop_BC ↗</a>）。預設只列你目前配置用得到的；標「舊版」的是作者重拍前的版本，零件可能跟現在的檔案不同。作者的播放清單：<a href="https://www.youtube.com/playlist?list=PL0AxX5F7uSsIER_8jmnkl3Xip5-CC_HGB" target="_blank" rel="noopener">主車組裝 ↗</a>、<a href="https://www.youtube.com/playlist?list=PL0AxX5F7uSsIGvmditFgBaNI6SvXfX3Xt" target="_blank" rel="noopener">4WS ↗</a>、<a href="https://www.youtube.com/playlist?list=PL0AxX5F7uSsL8j9zIhX_MDsKrEGC6mMlS" target="_blank" rel="noopener">車門與車頂 ↗</a>。</p>
       <div class="tools"><label><input type="checkbox" id="allVideos" ${showAll ? 'checked' : ''}> 顯示全部影片（含跟你配置無關的）</label></div>${html}`;
   }
 
