@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thumper 選配器</title>
+<meta name="description" content="BlackCrow Thumper 1:8 CJ7 攀爬車：點選配置，自動產生列印清單和採購清單。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">BlackCrow Thumper 1:8 CJ7 · 非官方整理</div>
+    <h1>Thumper <span class="mark">選配器</span></h1>
+    <p class="lead">點選你要的配置，網站會檢查相容性，然後產生<b>列印清單</b>和<b>採購清單</b>。所有 STL 都請到作者的 Printables 頁面下載，這裡只整理清單。</p>
+    <div class="presets" id="presets"></div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="分頁">
+    <button role="tab" id="tab-config" data-tab="config" aria-selected="true">選配</button>
+    <button role="tab" id="tab-print" data-tab="print" aria-selected="false">列印清單 <span class="badge" id="badge-print"></span></button>
+    <button role="tab" id="tab-bom" data-tab="bom" aria-selected="false">採購清單 <span class="badge" id="badge-bom"></span></button>
+    <button role="tab" id="tab-tips" data-tab="tips" aria-selected="false">避坑指南與來源</button>
+  </nav>
+
+  <main>
+    <section id="panel-config" class="panel" role="tabpanel">
+      <div class="config-layout">
+        <div id="groups"></div>
+        <aside class="summary" id="summary" aria-live="polite"></aside>
+      </div>
+    </section>
+    <section id="panel-print" class="panel" role="tabpanel" hidden></section>
+    <section id="panel-bom" class="panel" role="tabpanel" hidden></section>
+    <section id="panel-tips" class="panel" role="tabpanel" hidden></section>
+  </main>
+
+  <footer id="foot"></footer>
+</div>
+<div class="mbar" id="mbar"></div>
+<div class="toast" id="toast" role="status" hidden></div>
+<dialog id="zoom" aria-label="放大圖片"><button type="button" id="zoom-close">關閉</button><img id="zoom-img" alt=""><p id="zoom-cap"></p></dialog>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
