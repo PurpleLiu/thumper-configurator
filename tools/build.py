@@ -209,6 +209,18 @@ for g in C.GROUPS:
             if len(pages[pg]['images']) > i:
                 O['photo'] = f'img/g_{pg}_{i}.jpg'
                 need_imgs[O['photo']] = 'https://media.printables.com/' + pages[pg]['images'][i]
+        ph = getattr(C, 'PHOTOS', {}).get((g['id'], o['id']), {})
+        if ph.get('photo'):
+            o = {**o, 'photo': ph['photo']}
+            pg, i = ph['photo']
+            O['photo'] = f'img/g_{pg}_{i}.jpg'
+            need_imgs[O['photo']] = 'https://media.printables.com/' + pages[pg]['images'][i]
+        if ph.get('gallery'):
+            O['gallery'] = []
+            for pg, i, cap in ph['gallery']:
+                rel = f'img/g_{pg}_{i}.jpg'
+                need_imgs[rel] = 'https://media.printables.com/' + pages[pg]['images'][i]
+                O['gallery'].append({'src': rel, 'cap': cap})
         if not O.get('img') and not O.get('photo') and o.get('page') and pages.get(o['page'], {}).get('images'):
             pg = o['page']
             O['photo'] = f'img/g_{pg}_0.jpg'

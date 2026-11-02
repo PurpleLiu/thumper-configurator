@@ -123,6 +123,22 @@
     if (!pics.length) return '';
     return `<div class="pic ${pics.length > 1 ? 'two' : ''}">${pics.join('')}</div>`;
   }
+  // 放大檢視用的照片：主照片＋參考照片；沒有照片時用 3D 預覽圖
+  function shots(o) {
+    const a = [];
+    if (o.photo) a.push({ src: o.photo, cap: o.zh });
+    (o.gallery || []).forEach(x => a.push(x));
+    if (!a.length && o.img) a.push({ src: o.img, cap: o.zh + '（3D 預覽）' });
+    return a;
+  }
+  let zoomList = [], zoomAt = 0;
+  function zoomShow(i) {
+    zoomAt = (i + zoomList.length) % zoomList.length;
+    const z = zoomList[zoomAt];
+    $('#zoom-img').src = z.src;
+    $('#zoom-cap').textContent = (zoomList.length > 1 ? `${zoomAt + 1} / ${zoomList.length}　` : '') + z.cap;
+    $('#zoom').classList.toggle('multi', zoomList.length > 1);
+  }
   function renderGroups() {
     const res = compute(sel);
     $('#groups').innerHTML = G.map(g => {
@@ -133,7 +149,7 @@
           const on = cur.includes(o.id), ok = okFor(o, sel);
           const page = o.page && D.pages[o.page] ? `<a class="desc" href="${D.pages[o.page].url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Printables ${o.page} ↗</a>` : '';
           return `<button type="button" class="opt ${ok ? '' : 'blocked'}" aria-pressed="${on}" data-g="${g.id}" data-o="${o.id}">
-            ${img(o)}${o.photo ? '<span class="zoom" data-zoom="' + o.photo + '">放大</span>' : ''}
+            ${img(o)}${shots(o).length ? `<span class="zoom" data-zoom="${g.id}|${o.id}">${shots(o).length > 1 ? '照片 ' + shots(o).length + ' 張' : '放大'}</span>` : ''}
             <span class="txt"><span class="name">${o.unofficial ? '<span class="tag unoff">非官方</span>' : ''}${esc(o.zh)}</span>
             ${o.desc ? `<span class="desc">${esc(o.desc)}</span>` : ''}
             ${ok ? '' : `<span class="why">${esc(o.why || '跟目前的選擇不相容')}，點了會自動調整其他選項</span>`}${page}</span></button>`;
@@ -271,7 +287,14 @@
   document.addEventListener('click', e => {
     const t = e.target;
     const z = t.closest('[data-zoom]');
-    if (z) { e.stopPropagation(); $('#zoom-img').src = z.dataset.zoom; $('#zoom').showModal(); return; }
+    if (z) {
+      e.stopPropagation();
+      const [gid, oid] = z.dataset.zoom.split('|');
+      zoomList = shots(G.find(x => x.id === gid).options.find(x => x.id === oid));
+      zoomShow(0); $('#zoom').showModal(); return;
+    }
+    if (t.id === 'zoom-prev') return zoomShow(zoomAt - 1);
+    if (t.id === 'zoom-next') return zoomShow(zoomAt + 1);
     const o = t.closest('.opt');
     if (o) return apply(o.dataset.g, o.dataset.o);
     const tb = t.closest('.tabs button'); if (tb) return show(tb.dataset.tab);
@@ -303,6 +326,10 @@
   });
   $('#zoom-close').addEventListener('click', () => $('#zoom').close());
   $('#zoom').addEventListener('click', e => { if (e.target.id === 'zoom') $('#zoom').close(); });
+  $('#zoom').addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') zoomShow(zoomAt - 1);
+    if (e.key === 'ArrowRight') zoomShow(zoomAt + 1);
+  });
   $('#foot').innerHTML = `資料來源：BlackCrow（BlackCrowRockyTop）在 Printables 的官方頁面和其他作者的非官方頁面，${esc(D.fetched)} 整理。STL 檔案請到原頁面下載；作者不同意檔案被搬到其他網站，這裡只放清單和連結。照片和 3D 預覽圖版權屬於原作者。`;
   if (fromHash) toast('已載入分享的配置');
   show(tab);
